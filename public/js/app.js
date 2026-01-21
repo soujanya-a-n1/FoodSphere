@@ -14,10 +14,15 @@ let state = {
 document.addEventListener('DOMContentLoaded', () => {
     if (state.token) {
         updateAuthUI();
+        setupEventListeners();
+        loadRestaurants();
+        updateCartCount();
+        showHome();
+    } else {
+        // Force registration first - users must register before seeing food
+        setupEventListeners();
+        showRegister(); // Show registration page first
     }
-    setupEventListeners();
-    loadRestaurants();
-    updateCartCount();
 });
 
 // Setup event listeners
@@ -54,7 +59,7 @@ async function handleLogin(e) {
             localStorage.setItem('token', data.token);
             updateAuthUI();
             showHome();
-            showNotification('Login successful!');
+            showNotification(`Welcome back, ${data.user.name}! You can now browse restaurants and order food.`);
         } else {
             showNotification(data.message || 'Login failed', 'error');
         }
@@ -85,7 +90,7 @@ async function handleRegister(e) {
             localStorage.setItem('token', data.token);
             updateAuthUI();
             showHome();
-            showNotification('Registration successful!');
+            showNotification(`Welcome to FoodEasy, ${data.user.name}! Registration successful. You can now browse restaurants and order delicious food.`);
         } else {
             showNotification(data.message || 'Registration failed', 'error');
         }
@@ -100,10 +105,29 @@ function updateAuthUI() {
     if (state.token && state.currentUser) {
         authBtn.textContent = `${state.currentUser.name} (Logout)`;
         authBtn.onclick = logout;
+        // Show navigation when authenticated
+        updateNavVisibility(true);
     } else {
         authBtn.textContent = 'Login';
         authBtn.onclick = showLogin;
+        // Hide navigation when not authenticated
+        updateNavVisibility(false);
     }
+}
+
+function updateNavVisibility(isAuthenticated) {
+    const navLinks = document.querySelectorAll('.nav-link:not(.login-btn)');
+    navLinks.forEach(link => {
+        if (isAuthenticated) {
+            link.style.display = 'block';
+            link.style.pointerEvents = 'auto';
+            link.style.opacity = '1';
+        } else {
+            link.style.display = 'none';
+            link.style.pointerEvents = 'none';
+            link.style.opacity = '0.5';
+        }
+    });
 }
 
 function logout() {
@@ -111,10 +135,11 @@ function logout() {
     state.currentUser = null;
     state.cart = [];
     localStorage.removeItem('token');
+    localStorage.removeItem('pendingCart'); // Clear any pending cart
     updateAuthUI();
     updateCartCount();
-    showHome();
-    showNotification('Logged out successfully');
+    showRegister(); // Redirect to registration page
+    showNotification('Logged out successfully. Please register or login to continue using FoodEasy.');
 }
 
 // ==================== RESTAURANTS ====================
@@ -182,8 +207,65 @@ function getSampleRestaurants() {
 }
 
 async function searchRestaurants() {
-    const query = document.getElementById('searchInput').value;
-    showRestaurants();
+    const query = document.getElementById('searchInput').value.toLowerCase().trim();
+    
+    if (!state.token) {
+        showNotification('Please register first to search restaurants and food items', 'warning');
+        showRegister();
+        return;
+    }
+    
+    // Filter restaurants based on search query
+    if (query) {
+        const filteredRestaurants = state.restaurants.filter(restaurant => 
+            restaurant.name.toLowerCase().includes(query) ||
+            restaurant.cuisine.toLowerCase().includes(query) ||
+            (restaurant.description && restaurant.description.toLowerCase().includes(query))
+        );
+        
+        // Temporarily store filtered results
+        const originalRestaurants = [...state.restaurants];
+        state.restaurants = filteredRestaurants;
+        
+        showRestaurants();
+        
+        // Show search results message
+        if (filteredRestaurants.length === 0) {
+            showNotification(`No restaurants found for "${query}". Showing all restaurants.`, 'info');
+            state.restaurants = originalRestaurants;
+            displayRestaurants();
+        } else {
+            showNotification(`Found ${filteredRestaurants.length} restaurant(s) for "${query}"`, 'success');
+        }
+        
+        // Restore original restaurants after 10 seconds or when user clears search
+        setTimeout(() => {
+            if (document.getElementById('searchInput').value === '') {
+                state.restaurants = originalRestaurants;
+                displayRestaurants();
+            }
+        }, 10000);
+    } else {
+        // Show all restaurants if search is empty
+        showRestaurants();
+    }
+}
+
+// Add function to clear search
+function clearSearch() {
+    document.getElementById('searchInput').value = '';
+    loadRestaurants().then(() => {
+        displayRestaurants();
+        showNotification('Search cleared. Showing all restaurants.', 'info');
+    });
+}
+
+// Handle Enter key press in search
+function handleSearchKeyPress(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        searchRestaurants();
+    }
 }
 
 function displayRestaurants() {
@@ -213,13 +295,13 @@ function displayRestaurants() {
 function getRestaurantImage(restaurant) {
     // If restaurant has an image field and it's an emoji, use it
     if (restaurant.image && restaurant.image.length <= 4) {
-        return restaurant.image;
+        return `<span class="emoji-image">${restaurant.image}</span>`;
     }
     
-    // Map cuisine to emoji
+    // Map cuisine to emoji with fallback
     const cuisineEmojis = {
         'Italian': '🍕',
-        'American': '🍔',
+        'American': '🍔', 
         'Japanese': '🍣',
         'Mexican': '🌮',
         'Chinese': '🥡',
@@ -227,13 +309,56 @@ function getRestaurantImage(restaurant) {
         'Mediterranean': '🥙',
         'Thai': '🍜',
         'BBQ': '🍖',
+        'Desserts': '🍰',
+        'Pizza': '🍕',
+        'Burger': '🍔',
+        'Sushi': '🍣',
+        'Taco': '🌮'
+    };
+    
+    const emoji = cuisineEmojis[restaurant.cuisine] || '🏪';
+    return `<span class="emoji-image">${emoji}</span>`;
+}
+
+function getMenuItemImage(item) {
+    // If item has an image field, use it
+    if (item.image) {
+        return `<span class="emoji-image">${item.image}</span>`;
+    }
+    
+    // Map category to emoji
+    const categoryEmojis = {
+        'Pizza': '🍕',
+        'Burgers': '🍔',
+        'Rolls': '🍣',
+        'Nigiri': '🍣',
+        'Tacos': '🌮',
+        'Burritos': '🌯',
+        'Chicken': '🍗',
+        'Noodles': '🍜',
+        'Rice': '🍚',
+        'Curry': '🍛',
+        'Bread': '🫓',
+        'Wraps': '🥙',
+        'Kebabs': '🍢',
+        'Salads': '🥗',
+        'Sides': '🍟',
+        'Soups': '🍲',
+        'Appetizers': '🥟',
         'Desserts': '🍰'
     };
     
-    return cuisineEmojis[restaurant.cuisine] || '🏪';
+    const emoji = categoryEmojis[item.category] || '🍽️';
+    return `<span class="emoji-image">${emoji}</span>`;
 }
 
 async function openRestaurantMenu(restaurantId) {
+    if (!state.token) {
+        showNotification('Please register first to view restaurant menus and food items', 'warning');
+        showRegister();
+        return;
+    }
+    
     state.currentRestaurant = state.restaurants.find(r => r._id === restaurantId);
     
     try {
@@ -301,7 +426,7 @@ function displayMenu() {
     const menuItemsList = document.getElementById('menuItemsList');
     menuItemsList.innerHTML = (state.currentRestaurant.menu || []).map(item => `
         <div class="menu-item">
-            <div class="menu-item-image">${item.image || '🍽️'}</div>
+            <div class="menu-item-image">${getMenuItemImage(item)}</div>
             <h3>${item.name}</h3>
             <p class="menu-item-description">${item.description || 'Delicious item'}</p>
             <p class="menu-item-category">${item.category || 'Food'}</p>
@@ -320,8 +445,8 @@ function displayMenu() {
 
 function addToCart(itemId, itemName, itemPrice) {
     if (!state.token) {
-        showNotification('Please login to add items to cart', 'warning');
-        showLogin();
+        showNotification('Please register first to add items to your cart', 'warning');
+        showRegister();
         return;
     }
 
@@ -411,8 +536,8 @@ function checkout() {
     }
 
     if (!state.token) {
-        showNotification('Please login to checkout', 'warning');
-        showLogin();
+        showNotification('Please register first to checkout', 'warning');
+        showRegister();
         return;
     }
 
@@ -650,12 +775,22 @@ function closeOrderModal() {
 // ==================== NAVIGATION ====================
 
 function showHome() {
+    if (!state.token) {
+        showNotification('Please register first to access FoodEasy and browse restaurants', 'warning');
+        showRegister();
+        return;
+    }
     hideAllSections();
     document.getElementById('homeSection').style.display = 'block';
     updateActiveNav('home');
 }
 
 function showRestaurants() {
+    if (!state.token) {
+        showNotification('Please register first to browse restaurants and food items', 'warning');
+        showRegister();
+        return;
+    }
     hideAllSections();
     loadRestaurants();
     displayRestaurants();
@@ -670,8 +805,8 @@ function showMenu() {
 
 function showCart() {
     if (!state.token) {
-        showNotification('Please login to view cart', 'warning');
-        showLogin();
+        showNotification('Please register first to view your cart', 'warning');
+        showRegister();
         return;
     }
     hideAllSections();
@@ -693,16 +828,20 @@ function showOrders() {
     updateActiveNav('orders');
 }
 
-function showLogin() {
-    hideAllSections();
-    document.getElementById('loginForm').reset();
-    document.getElementById('loginSection').style.display = 'block';
-}
-
 function showRegister() {
     hideAllSections();
     document.getElementById('registerForm').reset();
     document.getElementById('registerSection').style.display = 'block';
+    // Hide navigation for non-authenticated users
+    updateNavVisibility(false);
+}
+
+function showLogin() {
+    hideAllSections();
+    document.getElementById('loginForm').reset();
+    document.getElementById('loginSection').style.display = 'block';
+    // Hide navigation for non-authenticated users
+    updateNavVisibility(false);
 }
 
 function showCheckout() {

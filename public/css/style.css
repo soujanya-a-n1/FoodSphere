@@ -634,18 +634,37 @@ body {
     justify-content: center;
     background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
     padding: 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1001;
 }
 
 .auth-container {
     width: 100%;
-    max-width: 400px;
+    max-width: 450px;
+    margin: auto;
 }
 
 .auth-form {
     background: white;
     padding: 40px;
-    border-radius: 10px;
-    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+    border-radius: 15px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    position: relative;
+    animation: slideIn 0.5s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .auth-form h2 {
@@ -704,6 +723,330 @@ body {
 
 .auth-form a:hover {
     text-decoration: underline;
+}
+
+/* Enhanced Registration Styles */
+.welcome-message, .checkout-message {
+    text-align: center;
+    margin-bottom: 30px;
+    padding: 25px;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    border-radius: 12px;
+    margin: -20px -20px 30px -20px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.welcome-message h1, .checkout-message h1 {
+    font-size: 28px;
+    margin-bottom: 10px;
+    font-weight: bold;
+}
+
+.welcome-message p, .checkout-message p {
+    font-size: 16px;
+    opacity: 0.95;
+    line-height: 1.5;
+}
+
+.benefits {
+    margin-top: 25px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    border-left: 4px solid var(--primary-color);
+}
+
+.benefits h3 {
+    color: var(--primary-color);
+    margin-bottom: 15px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.benefits ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.benefits li {
+    padding: 6px 0;
+    font-size: 14px;
+    color: var(--text-color);
+    display: flex;
+    align-items: center;
+}
+
+.benefits li:before {
+    content: "✓";
+    color: var(--primary-color);
+    font-weight: bold;
+    margin-right: 10px;
+    font-size: 16px;
+}
+
+/* Hide navigation items for non-authenticated users */
+.nav-link.hidden {
+    display: none !important;
+}
+
+/* Responsive design for auth pages */
+@media (max-width: 768px) {
+    .auth-container {
+        max-width: 95%;
+        margin: 0 auto;
+    }
+    
+    .auth-form {
+        padding: 30px 25px;
+    }
+    
+    .welcome-message {
+        margin: -15px -15px 25px -15px;
+        padding: 20px;
+    }
+    
+    .welcome-message h1 {
+        font-size: 24px;
+    }
+    
+    .welcome-message p {
+        font-size: 14px;
+    }
+    
+    .benefits {
+        padding: 15px;
+    }
+    
+    .benefits h3 {
+        font-size: 16px;
+    }
+    
+    .benefits li {
+        font-size: 13px;
+    }
+}
+
+/* Enhanced Search Styles */
+.search-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 20px;
+}
+
+.search-box {
+    flex: 1;
+    min-width: 250px;
+    padding: 12px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 25px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+.search-box:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.1);
+}
+
+.search-btn, .clear-btn {
+    padding: 12px 20px;
+    border: none;
+    border-radius: 25px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.search-btn {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.search-btn:hover {
+    background-color: var(--secondary-color);
+    transform: translateY(-2px);
+}
+
+.clear-btn {
+    background-color: #6c757d;
+    color: white;
+}
+
+.clear-btn:hover {
+    background-color: #5a6268;
+    transform: translateY(-2px);
+}
+
+/* Enhanced Image Styles */
+.emoji-image {
+    font-size: 48px;
+    display: inline-block;
+    text-align: center;
+    line-height: 1;
+    filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.1));
+}
+
+.restaurant-image {
+    text-align: center;
+    padding: 20px;
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+    border-radius: 15px;
+    margin-bottom: 15px;
+    border: 2px solid var(--border-color);
+}
+
+.restaurant-image .emoji-image {
+    font-size: 64px;
+}
+
+.menu-item-image {
+    text-align: center;
+    padding: 15px;
+    background: linear-gradient(135deg, var(--light-bg), #ffffff);
+    border-radius: 12px;
+    margin-bottom: 10px;
+    border: 1px solid var(--border-color);
+}
+
+.menu-item-image .emoji-image {
+    font-size: 40px;
+}
+
+/* Restaurant Header Styles */
+.restaurant-header {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    margin-bottom: 30px;
+}
+
+.restaurant-main-image {
+    flex-shrink: 0;
+}
+
+.restaurant-main-image .emoji-image {
+    font-size: 80px;
+}
+
+.restaurant-details h2 {
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.restaurant-cuisine {
+    color: var(--secondary-color);
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+.restaurant-stats {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.restaurant-stats span {
+    background: var(--light-bg);
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 14px;
+    border: 1px solid var(--border-color);
+}
+
+/* Menu Item Enhanced Styles */
+.menu-item {
+    display: flex;
+    gap: 15px;
+    background: white;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+    transition: transform 0.2s ease;
+}
+
+.menu-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.menu-item-content {
+    flex: 1;
+}
+
+.menu-item-name {
+    color: var(--primary-color);
+    margin-bottom: 8px;
+    font-size: 18px;
+}
+
+.menu-item-description {
+    color: #666;
+    margin-bottom: 8px;
+    line-height: 1.4;
+}
+
+.menu-item-category {
+    background: var(--secondary-color);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    display: inline-block;
+    margin-bottom: 10px;
+}
+
+.menu-item-price {
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 15px;
+}
+
+.item-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+@media (max-width: 768px) {
+    .search-container {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .search-box {
+        min-width: 100%;
+    }
+    
+    .restaurant-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .menu-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .item-actions {
+        flex-direction: column;
+        gap: 10px;
+    }
 }
 
 /* Checkout Page */

@@ -32,8 +32,11 @@
             <div class="hero-content">
                 <h1>Order your favorite food</h1>
                 <p>Fast delivery, fresh food, great prices</p>
-                <input type="text" id="searchInput" class="search-box" placeholder="Search restaurants...">
-                <button onclick="searchRestaurants()" class="search-btn">Search</button>
+                <div class="search-container">
+                    <input type="text" id="searchInput" class="search-box" placeholder="Search restaurants by name, cuisine, or description..." onkeypress="handleSearchKeyPress(event)">
+                    <button onclick="searchRestaurants()" class="search-btn">🔍 Search</button>
+                    <button onclick="clearSearch()" class="clear-btn">✕ Clear</button>
+                </div>
             </div>
         </div>
     </section>
@@ -109,15 +112,28 @@
     <section class="auth-page" id="registerSection" style="display: none;">
         <div class="auth-container">
             <div class="auth-form">
-                <h2>Register</h2>
+                <div class="welcome-message">
+                    <h1>🍕 Welcome to FoodEasy!</h1>
+                    <p>Join thousands of food lovers and get your favorite meals delivered fast!</p>
+                </div>
+                <h2>Create Your Account</h2>
                 <form id="registerForm">
                     <input type="text" name="name" placeholder="Full Name" required>
-                    <input type="email" name="email" placeholder="Email" required>
-                    <input type="password" name="password" placeholder="Password" required>
+                    <input type="email" name="email" placeholder="Email Address" required>
+                    <input type="password" name="password" placeholder="Create Password" required>
                     <input type="tel" name="phone" placeholder="Phone Number" required>
-                    <button type="submit" class="auth-btn">Register</button>
+                    <button type="submit" class="auth-btn">Join FoodEasy Now</button>
                 </form>
-                <p>Already have an account? <a href="#" onclick="showLogin()">Login</a></p>
+                <p>Already have an account? <a href="#" onclick="showLogin()">Login here</a></p>
+                <div class="benefits">
+                    <h3>Why join FoodEasy?</h3>
+                    <ul>
+                        <li>🚀 Fast delivery from top restaurants</li>
+                        <li>🍽️ Wide variety of cuisines</li>
+                        <li>📱 Easy ordering and tracking</li>
+                        <li>💳 Secure payment options</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </section>
